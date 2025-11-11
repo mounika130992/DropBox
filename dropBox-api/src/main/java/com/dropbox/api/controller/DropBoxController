@@ -1,4 +1,4 @@
-package com.example.dropbox.api.controller;
+package com.dropbox.api.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
