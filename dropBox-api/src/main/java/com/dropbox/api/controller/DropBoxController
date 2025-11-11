@@ -1,0 +1,65 @@
+package com.example.dropbox.api.controller;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.view.RedirectView;
+
+import java.util.Map;
+
+@Controller
+public class DropboxController {
+
+    @Value("${dropbox.client-id}")
+    private String clientId;
+
+    @Value("${dropbox.client-secret}")
+    private String clientSecret;
+
+    @Value("${dropbox.redirect-uri}")
+    private String redirectUri;
+
+    @GetMapping("/")
+    public RedirectView home() {
+        return new RedirectView("/authorize");
+    }
+
+    @GetMapping("/authorize")
+    public RedirectView authorize() {
+        String url = "https://www.dropbox.com/oauth2/authorize" +
+                "?client_id=" + clientId +
+                "&response_type=code" +
+                "&redirect_uri=" + redirectUri;
+        return new RedirectView(url);
+    }
+
+    @GetMapping("/callback")
+    public ResponseEntity<?> callback(@RequestParam("code") String code) {
+        String tokenUrl = "https://api.dropboxapi.com/oauth2/token";
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        String body = "code=" + code +
+                "&grant_type=authorization_code" +
+                "&client_id=" + clientId +
+                "&client_secret=" + clientSecret +
+                "&redirect_uri=" + redirectUri;
+
+        HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                tokenUrl,
+                HttpMethod.POST,
+                entity,
+                Map.class
+        );
+
+        return ResponseEntity.ok(response.getBody());
+    }
+}
