@@ -67,13 +67,14 @@ public class DropboxController {
      * Fetch Dropbox Team info 
      */
     @GetMapping("/teaminfo")
-    public ResponseEntity<?> getTeamInfo() {
+    public ResponseEntity<?> getTeamInfo(@RequestHeader("Authorization") String authorizationHeader) {
         String teamInfoUrl =  "https://api.dropboxapi.com/2/team/get_info";
+        String authToken = authorizationHeader.replace("Bearer ", "").trim();
         RestTemplate restTemplate = new RestTemplate();
-
+       
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(accessToken);
+        headers.setBearerAuth(authToken);
 
         HttpEntity<String> request = new HttpEntity<>("{}", headers);
 
